@@ -1,5 +1,5 @@
 /* =============================================================
-   DW SCHEMA + DIMDATE BUILD
+   DW SCHEMA + Dim_Date BUILD
    Source: none, this is a generated date spine, not derived
    from stg tables.
    ============================================================= */
@@ -10,7 +10,7 @@ GO
 CREATE SCHEMA dw;
 GO
  
-CREATE TABLE dw.DimDate (
+CREATE TABLE dw.Dim_Date (
     date_sk         INT PRIMARY KEY,
     full_date       DATE NOT NULL,
     year            INT NOT NULL,
@@ -35,7 +35,7 @@ GO
     FROM date_spine
     WHERE full_date < '2018-10-31'
 )
-INSERT INTO dw.DimDate (date_sk, full_date, year, quarter, month, month_name, day, day_name, day_of_week, is_weekend)
+INSERT INTO dw.Dim_Date (date_sk, full_date, year, quarter, month, month_name, day, day_name, day_of_week, is_weekend)
 SELECT
     CONVERT(INT, FORMAT(full_date, 'yyyyMMdd')),
     full_date,
@@ -54,5 +54,5 @@ GO
 
  --Sanity check
 SELECT COUNT(*) AS row_count, MIN(full_date) AS earliest, MAX(full_date) AS latest
-FROM dw.DimDate;
+FROM dw.Dim_Date;
 GO
