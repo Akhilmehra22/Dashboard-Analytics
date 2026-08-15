@@ -11,16 +11,16 @@ CREATE SCHEMA dw;
 GO
  
 CREATE TABLE dw.Dim_Date (
-    date_sk         INT PRIMARY KEY,
-    full_date       DATE NOT NULL,
-    year            INT NOT NULL,
-    quarter         INT NOT NULL,
-    month           INT NOT NULL,
-    month_name      NVARCHAR(20) NOT NULL,
-    day             INT NOT NULL,
-    day_name        NVARCHAR(20) NOT NULL,
-    day_of_week     INT NOT NULL,
-    is_weekend      BIT NOT NULL
+    Date_SK       INT PRIMARY KEY,
+    FullDate      DATE NOT NULL,
+    Year          INT NOT NULL,
+    Quarter       INT NOT NULL,
+    Month         INT NOT NULL,
+    MonthName     NVARCHAR(20) NOT NULL,
+    Day           INT NOT NULL,
+    DayName       NVARCHAR(20) NOT NULL,
+    DayOfWeek     INT NOT NULL,
+    IsWeekend     BIT NOT NULL
 );
 GO
  
@@ -35,7 +35,7 @@ GO
     FROM date_spine
     WHERE full_date < '2018-10-31'
 )
-INSERT INTO dw.Dim_Date (date_sk, full_date, year, quarter, month, month_name, day, day_name, day_of_week, is_weekend)
+INSERT INTO dw.Dim_Date (Date_SK, FullDate, Year, Quarter, Month, MonthName, Day, DayName, DayOfWeek, IsWeekend)
 SELECT
     CONVERT(INT, FORMAT(full_date, 'yyyyMMdd')),
     full_date,
@@ -53,6 +53,6 @@ GO
  
 
  --Sanity check
-SELECT COUNT(*) AS row_count, MIN(full_date) AS earliest, MAX(full_date) AS latest
+SELECT COUNT(*) AS row_count, MIN(FullDate) AS earliest, MAX(FullDate) AS latest
 FROM dw.Dim_Date;
 GO
