@@ -1,0 +1,143 @@
+/* =====================================================
+	Olist Delivery Performance — DAX Measures
+
+	Measure Location
+	All DAX measures are centralized in the _Measures table.
+
+	Grain Handling & Aggregation Rules
+
+	Order-Level Attributes: Fields like Is_Late_Order, Delivery_Delay_Days, review score, and handoff/transit days are order-level properties that repeat across multi-item rows.
+
+	Deduplication Logic: To prevent multi-item orders from inflating averages or counts, measures must aggregate using SUMMARIZE or DISTINCTCOUNT on Order_NK to collapse the dataset to the order grain first.
+
+	Data Type & Filtering Standards
+
+	Boolean Flags: Is_Late_Order and Is_Late_Carrier_handoff are imported as Boolean (True/False) fields.
+
+	DAX Syntax: Write filter predicates using TRUE() or FALSE() instead of numeric equivalents (1 / 0).
+   ===================================================== */
+
+
+/* ---------- Page 1: Overview ---------- */
+
+Total Orders =
+DISTINCTCOUNT('dw Fact_OrderItem'[Order_NK])
+
+
+Total Revenue =
+SUM('dw Fact_OrderItem'[Price]) + SUM('dw Fact_OrderItem'[FreightValue])
+
+
+Late Delivery Rate =
+DIVIDE(
+    CALCULATE(
+        DISTINCTCOUNT('dw Fact_OrderItem'[Order_NK]),
+        'dw Fact_OrderItem'[Is_Late_Order] = TRUE()
+    ),
+    DISTINCTCOUNT('dw Fact_OrderItem'[Order_NK])
+)
+
+
+Avg Delay Days (Late) =
+CALCULATE(
+    AVERAGEX(
+        SUMMARIZE(
+            'dw Fact_OrderItem',
+            'dw Fact_OrderItem'[Order_NK],
+            'dw Fact_OrderItem'[Delivery_Delay_Days]
+        ),
+        'dw Fact_OrderItem'[Delivery_Delay_Days]
+    ),
+    'dw Fact_OrderItem'[Is_Late_Order] = TRUE()
+)
+
+
+Avg Review Score (Late) =
+CALCULATE(
+    AVERAGEX(
+        SUMMARIZE(
+            'dw Fact_OrderItem',
+            'dw Fact_OrderItem'[Order_NK],
+            'dw Fact_OrderItem'[AvgReviewScore]
+        ),
+        'dw Fact_OrderItem'[AvgReviewScore]
+    ),
+    'dw Fact_OrderItem'[Is_Late_Order] = TRUE()
+)
+
+
+Avg Review Score (On Time) =
+CALCULATE(
+    AVERAGEX(
+        SUMMARIZE(
+            'dw Fact_OrderItem',
+            'dw Fact_OrderItem'[Order_NK],
+            'dw Fact_OrderItem'[AvgReviewScore]
+        ),
+        'dw Fact_OrderItem'[AvgReviewScore]
+    ),
+    'dw Fact_OrderItem'[Is_Late_Order] = FALSE()
+)
+
+
+Seller SLA Miss Rate =
+DIVIDE(
+    CALCULATE(
+        DISTINCTCOUNT('dw Fact_OrderItem'[Order_NK]),
+        'dw Fact_OrderItem'[Is_Late_Carrier_handoff] = TRUE()
+    ),
+    DISTINCTCOUNT('dw Fact_OrderItem'[Order_NK])
+)
+
+
+Sellers Missing SLA =
+CALCULATE(
+    DISTINCTCOUNT('dw Fact_OrderItem'[Seller_SK]),
+    'dw Fact_OrderItem'[Is_Late_Carrier_handoff] = TRUE()
+)
+
+
+/* ---------- Page 2: Concentration ---------- */
+
+Revenue at Risk =
+CALCULATE(
+    [Total Revenue],
+    'dw Fact_OrderItem'[Is_Late_Order] = TRUE()
+)
+
+
+/* ---------- Page 3: Diagnostics ---------- */
+
+Avg Seller Handoff Days =
+AVERAGE('dw Fact_OrderItem'[Carrier_Handoff_Days])
+
+
+Avg Carrier Transit Days =
+AVERAGE('dw Fact_OrderItem'[Carrier_Transit_days])
+
+
+/* Late orders split by which leg was the primary cause.
+   Seller-caused = seller missed their shipping-limit SLA.
+   Carrier-caused = seller met SLA but the order still arrived late. */
+
+Late Orders - Seller Caused =
+CALCULATE(
+    DISTINCTCOUNT('dw Fact_OrderItem'[Order_NK]),
+    'dw Fact_OrderItem'[Is_Late_Order] = TRUE(),
+    'dw Fact_OrderItem'[Is_Late_Carrier_handoff] = TRUE()
+)
+
+
+Late Orders - Carrier Caused =
+CALCULATE(
+    DISTINCTCOUNT('dw Fact_OrderItem'[Order_NK]),
+    'dw Fact_OrderItem'[Is_Late_Order] = TRUE(),
+    'dw Fact_OrderItem'[Is_Late_Carrier_handoff] = FALSE()
+)
+
+
+Seller Caused Share =
+DIVIDE(
+    [Late Orders - Seller Caused],
+    [Late Orders - Seller Caused] + [Late Orders - Carrier Caused]
+)

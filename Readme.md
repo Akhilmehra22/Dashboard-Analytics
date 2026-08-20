@@ -66,17 +66,17 @@ Three-layer build in a single SQL Server database:
 ### Page 1 — Olist Marketplace: Delivery Performance
 Headline finding (2.6 vs 4.3 review stars), core KPIs (total revenue, total orders, late rate, average delay, seller SLA miss rate), a delivery-outcome donut, and the late-rate trend over time with review score overlaid.
 
-![Overview](screenshots/Overview.png)
+![Overview](screenshots/Olist%20Marketplace%20Delivery%20Performance.png)
 
 ### Page 2 — Which Sellers and Regions to Fix First
 Late rate by category and by state (top 10 each), a seller revenue-vs-late-rate scatter (priority sellers in the top-right), and a seller scorecard table sorted by revenue at risk, showing total revenue alongside revenue at risk.
 
-![Which Sellers and Regions to Fix First](screenshots/where_to_fix_first.png)
+![Which Sellers and Regions to Fix First](screenshots/Which%20Sellers%20and%20Regions%20to%20Fix%20First.png)
 
 ### Page 3 — Whose Fault Is It: Seller or Carrier?
 Splits late delivery into seller-handoff delay vs carrier-transit delay (~27% seller-caused, ~73% carrier-caused), a two-leg trend over time, SLA miss rate by seller, and the delay split by state — so the fix is aimed at the right party.
 
-![Whose Fault Is It](screenshots/whose_fault.png)
+![Whose Fault Is It](screenshots/Whose%20Fault%20Is%20It%20Seller%20or%20Carrier.png)
 
 > **A note on the different totals:** the headline KPI cards ($15M revenue, ~96K orders) cover the full delivered-order population. The page 2 seller scorecard totals to a smaller base (~73K orders, ~$10.6M revenue) because that table is filtered to sellers with 50+ orders, so tiny-volume sellers don't distort the priority ranking. The two figures measure different populations by design, not a discrepancy.
 
